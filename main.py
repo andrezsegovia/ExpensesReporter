@@ -7,24 +7,29 @@ SCOPES = [
  'https://www.googleapis.com/auth/spreadsheets'
  ]
 
-SPREADSHEET_ID = 'xxxxxxxxxxxxxxxx'
+SPREADSHEET_ID = 'xxxx'
+
+
+def getTotalExpenses(expenses): 
+    print("The total is: {:,}".format(sum(int(c) for a,b,c,d in expenses)))
 
 def main():
     
     expense = createExpense.read()
-    print(expense)
 
     drive = Drive()
     service = drive.initService(drive.auth(SCOPES))
     
-    result = drive.readDefaultSheet(service, SPREADSHEET_ID)
-    
-    if not result:
+    expenses = drive.readDefaultSheet(service, SPREADSHEET_ID)
+
+    if not expenses:
         print('No data found...')
     else: 
-        range = drive.getLastRowRange(result)
-        print(drive.insertNewRecordAtRange(service, SPREADSHEET_ID, range, expense))
-
-
+        range = drive.getLastRowRange(expenses)
+        result = drive.insertNewRecordAtRange(service, SPREADSHEET_ID, range, expense)
+        if result and result['updatedRows'] and result['updatedRows'] == 1:
+            print("New expense added.")
+            expenses = drive.readDefaultSheet(service, SPREADSHEET_ID)
+            getTotalExpenses(expenses)
 if __name__ == "__main__":
     main()
